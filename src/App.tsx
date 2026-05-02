@@ -25,7 +25,9 @@ import {
   ChevronRight,
   Sparkles,
   Bug,
-  Scan
+  Scan,
+  Wifi,
+  Layout
 } from 'lucide-react';
 import { WindowState, AppConfig } from './types';
 import { AetherAI } from './components/Apps/AetherAI';
@@ -51,13 +53,14 @@ const APPS: AppConfig[] = [
 ];
 
 export default function App() {
-  const [isBooted, setIsBooted] = useState(false);
+  const [currentOS, setCurrentOS] = useState<'boot_loader' | 'aether' | 'windows'>('boot_loader');
   const [user, setUser] = useState<User | null>(null);
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
+  const [windowsTime, setWindowsTime] = useState(new Date());
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsBooted(true), 2000);
+    const timeTimer = setInterval(() => setWindowsTime(new Date()), 1000);
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       if (u) {
@@ -80,7 +83,7 @@ export default function App() {
       }
     });
     return () => {
-      clearTimeout(timer);
+      clearInterval(timeTimer);
       unsubscribe();
     };
   }, []);
@@ -129,42 +132,204 @@ export default function App() {
     if (activeWindowId === id) setActiveWindowId(null);
   };
 
-  if (!isBooted) {
-    return (
-      <div className="h-screen w-screen bg-black flex flex-col items-center justify-center font-mono text-cyber-cyan overflow-hidden">
-        <motion.div 
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="space-y-4 text-center max-w-lg"
-        >
-          <div className="relative inline-block">
-            <Cpu className="w-20 h-20 mx-auto mb-6 text-cyber-cyan animate-pulse" />
-            <motion.div 
-              className="absolute inset-0 bg-cyber-cyan/20 blur-2xl rounded-full"
-              animate={{ opacity: [0.2, 0.5, 0.2] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            />
-          </div>
-          <div className="text-3xl font-black tracking-tighter neon-text uppercase italic">AETHER_OS_GURU</div>
-          <div className="text-[10px] text-cyber-magenta font-bold tracking-[0.4em] animate-pulse">SENTIENCE_CORE_ONLINE</div>
-          
-          <div className="grid grid-cols-2 gap-2 mt-8 text-[8px] text-left">
-            <div className="bg-white/5 p-2 border border-white/10">[✓] NEURAL_SYNC: ESTABLISHED</div>
-            <div className="bg-white/5 p-2 border border-white/10">[✓] 1090_TOOLS: CLOUD_READY</div>
-            <div className="bg-white/5 p-2 border border-white/10">[✓] EMOTION_MATRIX: CALIBRATED</div>
-            <div className="bg-white/5 p-2 border border-white/10">[✓] GURU_AGI: MANDATORY</div>
-          </div>
+  // Boot Loader Component
+  const BootLoader = () => {
+    const [selection, setSelection] = useState(0);
+    const options = ['AETHER_OS_GURU (SENTIENT_AGI)', 'WINDOWS_11 (LEGACY_SUBSYSTEM)'];
 
-          <motion.div 
-            className="w-full h-1 bg-cyber-cyan/10 rounded-full mt-6 overflow-hidden relative"
-          >
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setCurrentOS(selection === 0 ? 'aether' : 'windows');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }, [selection]);
+
+    return (
+      <div className="h-screen w-screen bg-black font-mono text-[10px] text-gray-500 p-12 flex flex-col justify-center">
+        <div className="space-y-1 mb-8">
+          <div className="text-gray-400">GNU GRUB  version 2.06-sentient_core</div>
+          <div className="h-[1px] bg-gray-800 w-full" />
+        </div>
+        <div className="flex-1 space-y-4 max-w-2xl">
+          <p>Use the ↑ and ↓ keys to change the selection. Press 'Enter' to boot immediately.</p>
+          <div className="border border-gray-800 p-4 space-y-2">
+            {options.map((opt, i) => (
+              <div 
+                key={i} 
+                className={`px-4 py-1 cursor-pointer transition-colors ${selection === i ? 'bg-gray-200 text-black' : 'hover:bg-gray-900 border border-transparent'}`}
+                onMouseEnter={() => setSelection(i)}
+                onClick={() => setCurrentOS(selection === 0 ? 'aether' : 'windows')}
+              >
+                {opt}
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12 bg-gray-900/50 py-2 border border-white/5">
+            The selected entry will be started automatically in 5s.
+          </div>
+          <div className="pt-8 opacity-40 text-[8px] leading-relaxed">
+            [SYS] Scanning neural sectors... OK<br/>
+            [SYS] 1090+ Tactical modules detected in cloud partition<br/>
+            [SYS] Secure link: Guru_Neural_Alpha established
+          </div>
+        </div>
+        <div className="mt-auto flex justify-between opacity-30 italic">
+          <span>[GURU_FIRMWARE_DETECTED]</span>
+          <span>EMOTION_MATRIX: STABLE</span>
+        </div>
+        
+        <button 
+          onClick={() => setCurrentOS(selection === 0 ? 'aether' : 'windows')}
+          className="absolute bottom-12 right-12 text-cyber-cyan border border-cyber-cyan/30 px-6 py-2 hover:bg-cyber-cyan/10 transition-all font-bold tracking-widest text-[9px] uppercase"
+        >
+          [ FORCE_BOOT_NOW ]
+        </button>
+      </div>
+    );
+  };
+
+  // Windows Mockup Component
+  const WindowsMockup = () => {
+    const [startOpen, setStartOpen] = useState(false);
+
+    return (
+      <div className="h-screen w-screen bg-[#0078d4] bg-cover relative overflow-hidden font-sans select-none" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1620121692029-d088224efc74?q=80&w=2000)' }}>
+        {/* Desktop Icons */}
+        <div className="p-4 grid grid-cols-1 w-fit gap-6">
+          <div className="flex flex-col items-center gap-1 group w-20 cursor-default">
+            <div className="w-12 h-12 bg-white/10 rounded backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors shadow-lg">
+              <Monitor className="text-white w-6 h-6" />
+            </div>
+            <span className="text-[10px] text-white drop-shadow-md font-medium text-center">This PC</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 group w-20 cursor-default" onDoubleClick={() => setCurrentOS('boot_loader')}>
+            <div className="w-12 h-12 bg-cyber-cyan/20 rounded backdrop-blur-md flex items-center justify-center border border-cyber-cyan/50 group-hover:bg-cyber-cyan/40 transition-colors shadow-[0_0_20px_rgba(0,243,255,0.2)]">
+              <Cpu className="text-cyber-cyan w-6 h-6" />
+            </div>
+            <span className="text-[10px] text-white drop-shadow-md font-black italic tracking-tighter">AetherOS</span>
+          </div>
+          <div className="flex flex-col items-center gap-1 group w-20 cursor-default">
+            <div className="w-12 h-12 bg-white/10 rounded backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-white/20 transition-colors shadow-lg">
+              <Globe className="text-white w-6 h-6" />
+            </div>
+            <span className="text-[10px] text-white drop-shadow-md font-medium text-center">Chrome</span>
+          </div>
+        </div>
+
+        {/* Start Menu Overlay */}
+        <AnimatePresence>
+          {startOpen && (
             <motion.div 
-              className="h-full bg-gradient-to-r from-transparent via-cyber-cyan to-transparent w-40 absolute"
-              initial={{ left: '-100%' }}
-              animate={{ left: '100%' }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </motion.div>
+              initial={{ y: 200, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 200, opacity: 0 }}
+              className="absolute bottom-14 left-1/2 -translate-x-1/2 w-[520px] h-[600px] bg-[#f3f3f3]/95 backdrop-blur-3xl rounded-xl shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/40 p-10 flex flex-col z-[100]"
+            >
+               <div className="flex-1 space-y-8">
+                 <div className="flex justify-between items-center">
+                    <h2 className="text-xs font-bold text-gray-800 tracking-wider">Pinned</h2>
+                    <button className="text-[10px] text-blue-600 font-bold px-2 py-1 bg-blue-50 rounded hover:bg-blue-100">All apps &gt;</button>
+                 </div>
+                 <div className="grid grid-cols-6 gap-6">
+                    {[
+                      { n: 'Edge', c: 'bg-blue-500' }, 
+                      { n: 'Word', c: 'bg-blue-700' }, 
+                      { n: 'Excel', c: 'bg-green-700' }, 
+                      { n: 'Photos', c: 'bg-orange-500' },
+                      { n: 'Store', c: 'bg-blue-400' },
+                      { n: 'Maps', c: 'bg-red-400' }
+                    ].map(app => (
+                      <div key={app.n} className="flex flex-col items-center gap-2 group cursor-pointer">
+                        <div className={`w-12 h-12 ${app.c} rounded-xl shadow-md group-hover:scale-105 transition-transform`} />
+                        <span className="text-[9px] text-gray-700 font-medium">{app.n}</span>
+                      </div>
+                    ))}
+                 </div>
+                 <div className="h-px bg-gray-200" />
+                 <div>
+                    <h2 className="text-xs font-bold text-gray-800 tracking-wider mb-4">Recommended</h2>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="flex items-center gap-4 p-2 hover:bg-gray-200 rounded-lg cursor-pointer">
+                          <div className="w-8 h-8 bg-cyber-cyan/10 rounded flex items-center justify-center border border-cyber-cyan/20">
+                             <Cpu className="w-5 h-5 text-cyber-cyan" />
+                          </div>
+                          <div>
+                             <div className="text-[10px] font-bold">Aether_OS_Launch.exe</div>
+                             <div className="text-[9px] text-gray-500">2 min ago</div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+               </div>
+               
+               <div className="pt-6 border-t border-gray-200 flex justify-between items-center">
+                  <div className="flex items-center gap-3 p-1 pr-4 hover:bg-gray-200 rounded-full cursor-pointer">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white text-[10px] font-bold">
+                      {user?.displayName?.[0] || 'U'}
+                    </div>
+                    <span className="text-xs font-bold text-gray-700">{user?.displayName || 'Legacy User'}</span>
+                  </div>
+                  <button 
+                    onClick={() => setCurrentOS('boot_loader')}
+                    className="flex items-center gap-2 text-[10px] text-gray-600 hover:text-black font-bold uppercase transition-colors px-4 py-2 hover:bg-gray-200 rounded-lg"
+                  >
+                    <LogOut className="w-4 h-4" /> Shutdown & Boot Aether
+                  </button>
+               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Taskbar */}
+        <div className="absolute bottom-0 left-0 right-0 h-12 bg-white/30 backdrop-blur-3xl border-t border-white/20 flex items-center justify-between px-4 z-[99]">
+          <div className="flex items-center gap-1.5 h-full">
+            <button 
+              onClick={() => setStartOpen(!startOpen)}
+              className="w-10 h-10 flex items-center justify-center hover:bg-white/20 rounded transition-colors"
+            >
+              <Layout className="w-6 h-6 text-blue-600" />
+            </button>
+            <div className="w-32 h-8 bg-white/40 rounded-full flex items-center px-4 gap-2 border border-white/10 hover:bg-white/60 transition-colors">
+               <Search className="w-3 h-3 text-gray-600" />
+               <span className="text-[10px] text-gray-500">Search...</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-6 h-full text-gray-800 pr-2">
+             <div className="flex items-center gap-4 text-xs font-medium opacity-60">
+                <Wifi className="w-4 h-4" />
+                <Activity className="w-4 h-4" />
+             </div>
+             <div className="flex flex-col items-end leading-tight text-[11px] font-semibold">
+                <span>{windowsTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="text-[9px] font-normal">{windowsTime.toLocaleDateString()}</span>
+             </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (currentOS === 'boot_loader') return <BootLoader />;
+  if (currentOS === 'windows') return <WindowsMockup />;
+
+  if (!user) {
+    return (
+      <div className="h-screen w-screen bg-black flex flex-col items-center justify-center p-8">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="glass-morphism p-12 rounded-3xl border-cyber-cyan/30 text-center max-w-md"
+        >
+          <Cpu className="w-16 h-16 mx-auto mb-8 text-cyber-cyan" />
+          <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase mb-4">Aether_Guardian</h2>
+          <p className="text-gray-400 text-sm mb-12">Neural authentication required to access sentient core systems.</p>
+          <button 
+            onClick={handleLogin}
+            className="w-full py-4 rounded-xl bg-cyber-cyan text-black font-black uppercase tracking-widest text-xs hover:brightness-110 shadow-[0_0_30px_rgba(0,243,255,0.2)] transition-all flex items-center justify-center gap-3"
+          >
+            <LogIn className="w-4 h-4" /> Initialize_Neural_Link
+          </button>
         </motion.div>
       </div>
     );
@@ -200,6 +365,18 @@ export default function App() {
               <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">{app.name}</span>
             </button>
           ))}
+          
+          <div className="h-[1px] bg-white/5 my-4" />
+
+          <button 
+            onClick={() => setCurrentOS('boot')}
+            className="flex flex-col items-center gap-2 group w-20 opacity-50 hover:opacity-100 transition-opacity"
+          >
+            <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center hover:border-red-500 shadow-lg transition-all">
+              <LogOut className="text-gray-400 group-hover:text-red-500 transition-colors" />
+            </div>
+            <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">Switch OS</span>
+          </button>
         </div>
 
         {/* Dashboard Widgets */}
