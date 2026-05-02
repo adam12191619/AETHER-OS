@@ -44,6 +44,7 @@ import { FaceTrace } from './components/Apps/FaceTrace';
 import { Terminal } from './components/Apps/Terminal';
 import { CloudConsole } from './components/Apps/CloudConsole';
 import { SystemStorage } from './components/Apps/SystemStorage';
+import { CloudVault } from './components/Apps/CloudVault';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
@@ -59,7 +60,8 @@ const APPS: AppConfig[] = [
   { id: 'trace', name: 'Face Trace AI', icon: 'Scan', component: FaceTrace },
   { id: 'term', name: 'Sentient Shell', icon: 'Cpu', component: Terminal },
   { id: 'cloud', name: 'Cloud Mesh', icon: 'Cloud', component: CloudConsole },
-  { id: 'storage', name: 'Drive Diagnostics', icon: 'HardDrive', component: SystemStorage },
+  { id: 'vault', name: 'Guru Vault', icon: 'HardDrive', component: CloudVault },
+  { id: 'storage', name: 'Drive Diagnostics', icon: 'Activity', component: SystemStorage },
 ];
 
 export default function App() {
@@ -543,8 +545,13 @@ export default function App() {
                 <h3 className="font-bold text-sm tracking-widest uppercase">Cloud Mesh</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Manage 3.0TB Firebase Cluster</p>
               </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-cyber-magenta/20 transition-all cursor-pointer group" onClick={() => openApp('vault')}>
+                <HardDrive className="w-8 h-8 text-cyber-magenta mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Guru Vault</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Manage 3.0TB Personal Cloud</p>
+              </div>
               <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-gray-500/20 transition-all cursor-pointer group" onClick={() => openApp('storage')}>
-                <HardDrive className="w-8 h-8 text-gray-400 mb-4 group-hover:scale-110 transition-transform" />
+                <Activity className="w-8 h-8 text-gray-400 mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-sm tracking-widest uppercase">Drive Diagnostics</h3>
                 <p className="text-[10px] text-gray-500 mt-1">System (C:) 3.0TB Status</p>
               </div>
@@ -754,6 +761,13 @@ export default function App() {
            >
               <Cloud className="w-6 h-6" />
               <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Cloud</span>
+           </button>
+           <button 
+             onClick={() => openApp('vault')}
+             className={`flex flex-col items-center gap-1 transition-all ${windows.some(w => w.appId === 'vault') ? 'text-cyber-magenta' : 'text-gray-500'}`}
+           >
+              <HardDrive className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Vault</span>
            </button>
            <button 
              onClick={() => setCurrentOS('boot_loader')}
