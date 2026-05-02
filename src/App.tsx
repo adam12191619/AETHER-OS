@@ -22,13 +22,19 @@ import {
   Shield,
   Layers,
   Search,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Bug,
+  Scan
 } from 'lucide-react';
 import { WindowState, AppConfig } from './types';
 import { AetherAI } from './components/Apps/AetherAI';
 import { CreativeForge } from './components/Apps/CreativeForge';
 import { NetRunner } from './components/Apps/NetRunner';
 import { Arsenal } from './components/Apps/Arsenal';
+import { WebForge } from './components/Apps/WebForge';
+import { VirtexForge } from './components/Apps/VirtexForge';
+import { FaceTrace } from './components/Apps/FaceTrace';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
@@ -39,6 +45,9 @@ const APPS: AppConfig[] = [
   { id: 'forge', name: 'Creative Forge', icon: 'Zap', component: CreativeForge },
   { id: 'net', name: 'NetRunner', icon: 'Globe', component: NetRunner },
   { id: 'arsenal', name: 'Tactical Arsenal', icon: 'Shield', component: Arsenal },
+  { id: 'web', name: 'Web Forge', icon: 'Sparkles', component: WebForge },
+  { id: 'virtex', name: 'Murbug Forge', icon: 'Zap', component: VirtexForge },
+  { id: 'trace', name: 'Face Trace AI', icon: 'Scan', component: FaceTrace },
 ];
 
 export default function App() {
@@ -184,6 +193,9 @@ export default function App() {
                 {app.id === 'forge' && <Zap className="text-cyber-purple group-hover:scale-110 transition-transform" />}
                 {app.id === 'net' && <Globe className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
                 {app.id === 'arsenal' && <Shield className="text-yellow-500 group-hover:scale-110 transition-transform" />}
+                {app.id === 'web' && <Sparkles className="text-green-400 group-hover:scale-110 transition-transform" />}
+                {app.id === 'virtex' && <Zap className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
+                {app.id === 'trace' && <Scan className="text-orange-500 group-hover:scale-110 transition-transform" />}
               </div>
               <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">{app.name}</span>
             </button>
@@ -242,6 +254,21 @@ export default function App() {
                 <Globe className="w-8 h-8 text-cyber-magenta mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-sm tracking-widest uppercase">Net Stats</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Real-time Global Infiltration</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-green-400/20 transition-all cursor-pointer group" onClick={() => openApp('web')}>
+                <Sparkles className="w-8 h-8 text-green-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Web Forge</h3>
+                <p className="text-[10px] text-gray-500 mt-1">AI Neural Template Engine</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-red-500/20 transition-all cursor-pointer group" onClick={() => openApp('virtex')}>
+                <Zap className="w-8 h-8 text-cyber-magenta mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Murbug Forge</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Virtex & Payload Generator</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-orange-500/20 transition-all cursor-pointer group" onClick={() => openApp('trace')}>
+                <Scan className="w-8 h-8 text-orange-500 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Face Trace</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Biometric OSINT Trace</p>
               </div>
             </div>
 
