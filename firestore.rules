@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // --- Validation Blueprints ---
+    
+    function isValidUser(data) {
+      return data.userId == request.auth.uid 
+        && data.email is string && data.email.size() <= 200
+        && data.keys().hasAll(['userId', 'email'])
+        && data.keys().size() <= 6; // Allow for optional displayName/photoURL/createdAt
+    }
+
+    function isValidCreativeTask(data) {
+      return data.userId == request.auth.uid
+        && data.type in ['video', 'music', 'image', 'anime', 'film']
+        && data.prompt is string && data.prompt.size() <= 2000
+        && data.status in ['processing', 'completed', 'failed']
+        && data.progress is number && data.progress >= 0 && data.progress <= 100;
+    }
+
+    function isValidChatMessage(data) {
+      return data.userId == request.auth.uid
+        && data.role in ['user', 'ai', 'system']
+        && data.text is string && data.text.size() <= 5000;
+    }
+
+    // --- Collections ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(incoming())
+                    && incoming().userId == existing().userId
+                    && incoming().createdAt == existing().createdAt;
+      
+      match /creative_tasks/{taskId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(taskId) && isValidCreativeTask(incoming()) && incoming().createdAt == request.time;
+        allow update: if isOwner(userId) && isValidCreativeTask(incoming())
+                      && (incoming().get('resultUrl', '') is string)
+                      && incoming().userId == existing().userId
+                      && incoming().createdAt == existing().createdAt;
+        allow delete: if isOwner(userId);
+      }
+
+      match /chat_history/{messageId} {
+        allow list, get: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidId(messageId) && isValidChatMessage(incoming()) && incoming().createdAt == request.time;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
