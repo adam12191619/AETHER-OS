@@ -41,7 +41,6 @@ import { WebForge } from './components/Apps/WebForge';
 import { VirtexForge } from './components/Apps/VirtexForge';
 import { FaceTrace } from './components/Apps/FaceTrace';
 import { Terminal } from './components/Apps/Terminal';
-import { SettingsApp } from './components/Apps/Settings';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
@@ -56,7 +55,6 @@ const APPS: AppConfig[] = [
   { id: 'virtex', name: 'Murbug Forge', icon: 'Zap', component: VirtexForge },
   { id: 'trace', name: 'Face Trace AI', icon: 'Scan', component: FaceTrace },
   { id: 'term', name: 'Sentient Shell', icon: 'Cpu', component: Terminal },
-  { id: 'settings', name: 'Core Config', icon: 'Settings', component: () => null }, // Special handling below
 ];
 
 export default function App() {
@@ -72,8 +70,6 @@ export default function App() {
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
   const [windowsTime, setWindowsTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState<'home' | 'apps' | 'radio'>('home');
-  const [showActionBar, setShowActionBar] = useState(true);
-  const [layoutPolicy, setLayoutPolicy] = useState<'tabs' | 'slider' | 'bottom'>('tabs');
 
   const isMobile = typeof window !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -373,8 +369,8 @@ export default function App() {
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyber-purple/10 blur-[120px] rounded-full" />
       </div>
 
-      {/* Mobile Top Action Bar (Action Bar: YES) */}
-      {isMobile && showActionBar && (
+      {/* Mobile Top Action Bar */}
+      {isMobile && (
         <header className="h-16 px-6 flex items-center justify-between bg-black/40 backdrop-blur-xl border-b border-white/5 z-[100] sticky top-0">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 rounded-lg bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center justify-center">
@@ -534,11 +530,6 @@ export default function App() {
                 <h3 className="font-bold text-sm tracking-widest uppercase">Sentient Shell</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Direct Guru Kernel Access</p>
               </div>
-              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-white/20 transition-all cursor-pointer group" onClick={() => openApp('settings')}>
-                <Settings className="w-8 h-8 text-gray-400 mb-4 group-hover:scale-110 transition-transform" />
-                <h3 className="font-bold text-sm tracking-widest uppercase">Core Config</h3>
-                <p className="text-[10px] text-gray-500 mt-1">Mobile Layout & System</p>
-              </div>
             </div>
 
             {/* Global Tool Search Dashboard */}
@@ -638,14 +629,7 @@ export default function App() {
                 </div>
               </div>
               <div className="flex-1 overflow-hidden">
-                {app.id === 'settings' ? (
-                  <SettingsApp 
-                    layoutPolicy={layoutPolicy} 
-                    setLayoutPolicy={setLayoutPolicy} 
-                    showActionBar={showActionBar} 
-                    setShowActionBar={setShowActionBar} 
-                  />
-                ) : app.id === 'ai' ? (
+                {app.id === 'ai' ? (
                   <AetherAI userId={currentUserId} />
                 ) : (
                   <app.component />
@@ -731,7 +715,7 @@ export default function App() {
 
       {/* Mobile Navigation */}
       {isMobile && (
-        <nav className={`fixed bottom-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-2xl border-t border-white/10 flex justify-around items-center px-6 z-[100] transition-all ${layoutPolicy === 'bottom' ? 'h-24 pb-4' : ''}`}>
+        <nav className="fixed bottom-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-2xl border-t border-white/10 flex justify-around items-center px-6 z-[100] transition-all">
            <button 
              onClick={() => setActiveTab('home')}
              className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-cyber-cyan scale-110' : 'text-gray-500'}`}
@@ -745,13 +729,6 @@ export default function App() {
            >
               <Box className="w-6 h-6" />
               <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Apps</span>
-           </button>
-           <button 
-             onClick={() => openApp('settings')}
-             className={`flex flex-col items-center gap-1 transition-all ${windows.some(w => w.appId === 'settings') ? 'text-cyber-magenta' : 'text-gray-500'}`}
-           >
-              <Settings className="w-6 h-6" />
-              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Config</span>
            </button>
            <button 
              onClick={() => setCurrentOS('boot_loader')}
