@@ -53,7 +53,12 @@ const APPS: AppConfig[] = [
 ];
 
 export default function App() {
-  const [currentOS, setCurrentOS] = useState<'boot_loader' | 'aether' | 'windows'>('boot_loader');
+  const [currentOS, setCurrentOS] = useState<'boot_loader' | 'aether' | 'windows'>(() => {
+    if (typeof window !== 'undefined' && /Android/i.test(navigator.userAgent)) {
+      return 'aether';
+    }
+    return 'boot_loader';
+  });
   const [user, setUser] = useState<User | null>(null);
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
@@ -150,6 +155,19 @@ export default function App() {
           <div className="text-gray-400">GNU GRUB  version 2.06-sentient_core</div>
           <div className="h-[1px] bg-gray-800 w-full" />
         </div>
+        
+        <div className="mb-6 p-4 border border-blue-500/30 bg-blue-500/5 text-blue-400">
+           <div className="flex items-center gap-2 mb-2">
+              <Shield className="w-3 h-3" />
+              <span className="font-bold uppercase">Compatibility_Verification_Engine</span>
+           </div>
+           <div className="space-y-1 text-[8px]">
+              <div>[OS_QUERY] Verifying Host Architecture... OK</div>
+              <div>[OS_MATCH] Required: WINDOWS_9 | WINDOWS_10 | WINDOWS_11</div>
+              <div className="text-white font-bold opacity-100">[OS_SUCCESS] Host verified as COMPATIBLE_NT_KERNEL</div>
+           </div>
+        </div>
+
         <div className="flex-1 space-y-4 max-w-2xl">
           <p>Use the ↑ and ↓ keys to change the selection. Press 'Enter' to boot immediately.</p>
           <div className="border border-gray-800 p-4 space-y-2">
