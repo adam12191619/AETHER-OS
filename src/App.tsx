@@ -28,7 +28,9 @@ import {
   Scan,
   Wifi,
   Layout,
-  HardDrive
+  HardDrive,
+  Power,
+  Box
 } from 'lucide-react';
 import { WindowState, AppConfig } from './types';
 import { AetherAI } from './components/Apps/AetherAI';
@@ -38,6 +40,8 @@ import { Arsenal } from './components/Apps/Arsenal';
 import { WebForge } from './components/Apps/WebForge';
 import { VirtexForge } from './components/Apps/VirtexForge';
 import { FaceTrace } from './components/Apps/FaceTrace';
+import { Terminal } from './components/Apps/Terminal';
+import { SettingsApp } from './components/Apps/Settings';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
@@ -51,6 +55,8 @@ const APPS: AppConfig[] = [
   { id: 'web', name: 'Web Forge', icon: 'Sparkles', component: WebForge },
   { id: 'virtex', name: 'Murbug Forge', icon: 'Zap', component: VirtexForge },
   { id: 'trace', name: 'Face Trace AI', icon: 'Scan', component: FaceTrace },
+  { id: 'term', name: 'Sentient Shell', icon: 'Cpu', component: Terminal },
+  { id: 'settings', name: 'Core Config', icon: 'Settings', component: () => null }, // Special handling below
 ];
 
 export default function App() {
@@ -61,9 +67,15 @@ export default function App() {
     return 'boot_loader';
   });
   const [user, setUser] = useState<User | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [windows, setWindows] = useState<WindowState[]>([]);
   const [activeWindowId, setActiveWindowId] = useState<string | null>(null);
   const [windowsTime, setWindowsTime] = useState(new Date());
+  const [activeTab, setActiveTab] = useState<'home' | 'apps' | 'radio'>('home');
+  const [showActionBar, setShowActionBar] = useState(true);
+  const [layoutPolicy, setLayoutPolicy] = useState<'tabs' | 'slider' | 'bottom'>('tabs');
+
+  const isMobile = typeof window !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   useEffect(() => {
     const timeTimer = setInterval(() => setWindowsTime(new Date()), 1000);
@@ -96,18 +108,24 @@ export default function App() {
 
   const handleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      setUser(result.user);
+      setIsGuest(false);
     } catch (error) {
       console.error("Login failed", error);
+      setIsGuest(true);
     }
   };
 
-  const handleLogout = () => signOut(auth);
+  const handleLogout = () => {
+    signOut(auth);
+    setUser(null);
+    setIsGuest(false);
+  };
 
   const openApp = (appId: string) => {
-    if (!user) {
-      alert("Please login to access AetherOS systems.");
-      return;
+    if (!user && !isGuest) {
+      setIsGuest(true);
     }
     
     if (windows.find(w => w.appId === appId)) {
@@ -345,88 +363,99 @@ export default function App() {
   if (currentOS === 'boot_loader') return <BootLoader />;
   if (currentOS === 'windows') return <WindowsMockup />;
 
-  if (!user) {
-    return (
-      <div className="h-screen w-screen bg-black flex flex-col items-center justify-center p-8">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-morphism p-12 rounded-3xl border-cyber-cyan/30 text-center max-w-md"
-        >
-          <Cpu className="w-16 h-16 mx-auto mb-8 text-cyber-cyan" />
-          <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase mb-4">Aether_Guardian</h2>
-          <p className="text-gray-400 text-sm mb-12">Neural authentication required to access sentient core systems.</p>
-          <button 
-            onClick={handleLogin}
-            className="w-full py-4 rounded-xl bg-cyber-cyan text-black font-black uppercase tracking-widest text-xs hover:brightness-110 shadow-[0_0_30px_rgba(0,243,255,0.2)] transition-all flex items-center justify-center gap-3"
-          >
-            <LogIn className="w-4 h-4" /> Initialize_Neural_Link
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
+  const currentUserId = user?.uid || 'GUEST_USER';
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden cyber-grid bg-cyber-bg">
+    <div className={`h-screen w-screen relative overflow-hidden cyber-grid bg-cyber-bg ${isMobile ? 'flex flex-col' : ''}`}>
       {/* Background Ambience */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-cyber-cyan/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-cyber-purple/10 blur-[120px] rounded-full" />
       </div>
 
-      {/* Desktop Content Area */}
-      <div className="relative h-full w-full flex">
-        {/* Sidebar Icons */}
-        <div className="p-8 grid grid-cols-1 w-fit gap-8 relative z-0 h-full content-start border-r border-white/5 backdrop-blur-md bg-black/20">
-          {APPS.map(app => (
-            <button 
-              key={app.id} 
-              onClick={() => openApp(app.id)}
-              className="flex flex-col items-center gap-2 group w-20"
-            >
-              <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center group-hover:border-cyber-cyan shadow-lg group-hover:shadow-cyber-cyan/20 transition-all">
-                {app.id === 'ai' && <Bot className="text-cyber-cyan group-hover:scale-110 transition-transform" />}
-                {app.id === 'forge' && <Zap className="text-cyber-purple group-hover:scale-110 transition-transform" />}
-                {app.id === 'net' && <Globe className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
-                {app.id === 'arsenal' && <Shield className="text-yellow-500 group-hover:scale-110 transition-transform" />}
-                {app.id === 'web' && <Sparkles className="text-green-400 group-hover:scale-110 transition-transform" />}
-                {app.id === 'virtex' && <Zap className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
-                {app.id === 'trace' && <Scan className="text-orange-500 group-hover:scale-110 transition-transform" />}
-              </div>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">{app.name}</span>
-            </button>
-          ))}
-          
-          <div className="h-[1px] bg-white/5 my-4" />
-
-          <button 
-            onClick={() => setCurrentOS('boot_loader')}
-            className="flex flex-col items-center gap-2 group w-20 opacity-50 hover:opacity-100 transition-opacity"
-          >
-            <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center hover:border-red-500 shadow-lg transition-all">
-              <LogOut className="text-gray-400 group-hover:text-red-500 transition-colors" />
-            </div>
-            <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">Switch OS</span>
-          </button>
-
-          <div className="mt-8 pt-4 border-t border-white/5">
-             <div className="flex items-center gap-2 mb-3">
-                <HardDrive className="w-3 h-3 text-gray-600" />
-                <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Mounted_Partitions</span>
+      {/* Mobile Top Action Bar (Action Bar: YES) */}
+      {isMobile && showActionBar && (
+        <header className="h-16 px-6 flex items-center justify-between bg-black/40 backdrop-blur-xl border-b border-white/5 z-[100] sticky top-0">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-lg bg-cyber-cyan/10 border border-cyber-cyan/30 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-cyber-cyan" />
              </div>
-             <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between group hover:border-blue-500/30 transition-all cursor-default">
-                <div>
-                   <div className="text-[9px] font-bold text-gray-400">Windows_C:</div>
-                   <div className="text-[7px] text-gray-600 font-mono">NTFS / READ_ONLY</div>
+             <div>
+                <h1 className="text-[10px] font-black tracking-[0.2em] text-white uppercase italic">AetherOS</h1>
+                <div className="flex items-center gap-1">
+                   <div className="w-1 h-1 rounded-full bg-green-500 animate-pulse" />
+                   <span className="text-[7px] text-gray-500 font-mono uppercase">Neural_Link: Stable</span>
                 </div>
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
              </div>
           </div>
-        </div>
+          <div className="flex items-center gap-4 text-gray-400">
+             <div className="flex items-center gap-1">
+                <Wifi className="w-3 h-3" />
+                <span className="text-[8px] font-mono">5G</span>
+             </div>
+             <div className="flex items-center gap-1">
+                <HardDrive className="w-3 h-3" />
+                <span className="text-[8px] font-mono">92%</span>
+             </div>
+             <span className="text-[10px] font-bold text-white font-mono">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          </div>
+        </header>
+      )}
+
+      {/* Desktop Content Area */}
+      <div className={`relative h-full w-full flex ${isMobile ? 'flex-col overflow-y-auto pb-24' : ''}`}>
+        {/* Sidebar Icons (Hidden on mobile) */}
+        {!isMobile && (
+          <div className="p-8 grid grid-cols-1 w-fit gap-8 relative z-0 h-full content-start border-r border-white/5 backdrop-blur-md bg-black/20">
+            {APPS.map(app => (
+              <button 
+                key={app.id} 
+                onClick={() => openApp(app.id)}
+                className="flex flex-col items-center gap-2 group w-20"
+              >
+                <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center group-hover:border-cyber-cyan shadow-lg group-hover:shadow-cyber-cyan/20 transition-all">
+                  {app.id === 'ai' && <Bot className="text-cyber-cyan group-hover:scale-110 transition-transform" />}
+                  {app.id === 'forge' && <Zap className="text-cyber-purple group-hover:scale-110 transition-transform" />}
+                  {app.id === 'net' && <Globe className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
+                  {app.id === 'arsenal' && <Shield className="text-yellow-500 group-hover:scale-110 transition-transform" />}
+                  {app.id === 'web' && <Sparkles className="text-green-400 group-hover:scale-110 transition-transform" />}
+                  {app.id === 'virtex' && <Zap className="text-cyber-magenta group-hover:scale-110 transition-transform" />}
+                  {app.id === 'trace' && <Scan className="text-orange-500 group-hover:scale-110 transition-transform" />}
+                </div>
+                <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">{app.name}</span>
+              </button>
+            ))}
+            
+            <div className="h-[1px] bg-white/5 my-4" />
+
+            <button 
+              onClick={() => setCurrentOS('boot_loader')}
+              className="flex flex-col items-center gap-2 group w-20 opacity-50 hover:opacity-100 transition-opacity"
+            >
+              <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center hover:border-red-500 shadow-lg transition-all">
+                <LogOut className="text-gray-400 group-hover:text-red-500 transition-colors" />
+              </div>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">Switch OS</span>
+            </button>
+
+            <div className="mt-8 pt-4 border-t border-white/5">
+               <div className="flex items-center gap-2 mb-3">
+                  <HardDrive className="w-3 h-3 text-gray-600" />
+                  <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Mounted_Partitions</span>
+               </div>
+               <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between group hover:border-blue-500/30 transition-all cursor-default">
+                  <div>
+                     <div className="text-[9px] font-bold text-gray-400">Windows_C:</div>
+                     <div className="text-[7px] text-gray-600 font-mono">NTFS / READ_ONLY</div>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
+               </div>
+            </div>
+          </div>
+        )}
 
         {/* Dashboard Widgets */}
-        <div className="flex-1 p-12 relative overflow-hidden">
+        <div className={`flex-1 ${isMobile ? 'p-6' : 'p-12'} relative overflow-hidden`}>
           <div className="max-w-4xl space-y-8">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -492,6 +521,16 @@ export default function App() {
                 <Scan className="w-8 h-8 text-orange-500 mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-sm tracking-widest uppercase">Face Trace</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Biometric OSINT Trace</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-blue-500/20 transition-all cursor-pointer group" onClick={() => openApp('term')}>
+                <Cpu className="w-8 h-8 text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Sentient Shell</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Direct Guru Kernel Access</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-white/20 transition-all cursor-pointer group" onClick={() => openApp('settings')}>
+                <Settings className="w-8 h-8 text-gray-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Core Config</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Mobile Layout & System</p>
               </div>
             </div>
 
@@ -567,9 +606,9 @@ export default function App() {
                 zIndex: activeWindowId === window.id ? 50 : 10
               }}
               exit={{ scale: 0.95, opacity: 0 }}
-              drag
+              drag={!isMobile}
               dragMomentum={false}
-              className="absolute glass-morphism rounded-xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-3xl border-t border-l border-white/10"
+              className={`absolute glass-morphism rounded-xl overflow-hidden flex flex-col shadow-2xl backdrop-blur-3xl border-t border-l border-white/10 ${isMobile ? '!left-0 !top-0 !w-full !h-full rounded-none pt-16 z-[150]' : ''}`}
               style={{
                 left: window.x,
                 top: window.y,
@@ -586,73 +625,121 @@ export default function App() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button className="w-4 h-4 rounded-full border border-cyber-border flex items-center justify-center hover:bg-white/10">
-                    <Minimize2 className="w-2 h-2" />
-                  </button>
                   <button onClick={() => closeWindow(window.id)} className="w-4 h-4 rounded-full border border-red-500/50 flex items-center justify-center hover:bg-red-500/20 text-red-500">
                     <X className="w-2 h-2" />
                   </button>
                 </div>
               </div>
               <div className="flex-1 overflow-hidden">
-                <app.component />
+                {app.id === 'settings' ? (
+                  <SettingsApp 
+                    layoutPolicy={layoutPolicy} 
+                    setLayoutPolicy={setLayoutPolicy} 
+                    showActionBar={showActionBar} 
+                    setShowActionBar={setShowActionBar} 
+                  />
+                ) : app.id === 'ai' ? (
+                  <AetherAI userId={currentUserId} />
+                ) : (
+                  <app.component />
+                )}
               </div>
             </motion.div>
           );
         })}
       </AnimatePresence>
 
-      {/* Bottom Taskbar */}
-      <div className="absolute bottom-0 left-0 right-0 h-16 glass-morphism border-t border-cyber-border flex items-center justify-between px-6 z-[100]">
-        <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
-            <Monitor className="text-cyber-cyan w-5 h-5 shadow-[0_0_10px_rgba(0,243,255,0.5)]" />
-          </button>
-          <div className="w-[1px] h-6 bg-cyber-border mx-2" />
-          <div className="flex gap-2">
-            {windows.map(w => (
-              <button 
-                key={w.id}
-                onClick={() => setActiveWindowId(w.id)}
-                className={`px-3 py-1 rounded border text-[10px] font-bold transition-all ${activeWindowId === w.id ? 'border-cyber-cyan text-cyber-cyan bg-cyber-cyan/5' : 'border-cyber-border text-gray-500'}`}
-              >
-                {APPS.find(a => a.id === w.appId)?.name.toUpperCase()}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-6 font-mono text-[10px] text-gray-400">
-          {user ? (
-            <div className="flex items-center gap-4 border-r border-white/10 pr-6 mr-2">
-              <div className="flex flex-col items-end">
-                <span className="text-white font-bold">{user.displayName}</span>
-                <span className="text-[8px] text-green-500 uppercase tracking-widest">Session: Active</span>
-              </div>
-              <button onClick={handleLogout} className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors" title="Termination Session">
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={handleLogin}
-              className="flex items-center gap-2 px-4 py-2 bg-cyber-cyan/10 border border-cyber-cyan/30 rounded text-cyber-cyan hover:bg-cyber-cyan hover:text-black transition-all font-bold uppercase tracking-widest"
-            >
-              <LogIn className="w-4 h-4" />
-              Initialize Session
+      {/* Bottom Taskbar (Hidden on mobile) */}
+      {!isMobile && (
+        <div className="absolute bottom-0 left-0 right-0 h-16 glass-morphism border-t border-cyber-border flex items-center justify-between px-6 z-[100]">
+          <div className="flex items-center gap-4">
+            <button className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <Monitor className="text-cyber-cyan w-5 h-5 shadow-[0_0_10px_rgba(0,243,255,0.5)]" />
             </button>
-          )}
-          
-          <div className="flex items-center gap-2">
-            <Settings className="w-3 h-3" />
-            <span>SYS_OPTIMAL</span>
+            <div className="w-[1px] h-6 bg-cyber-border mx-2" />
+            <div className="flex gap-2">
+              {windows.map(w => (
+                <button 
+                  key={w.id}
+                  onClick={() => setActiveWindowId(w.id)}
+                  className={`px-3 py-1 rounded border text-[10px] font-bold transition-all ${activeWindowId === w.id ? 'border-cyber-cyan text-cyber-cyan bg-cyber-cyan/5' : 'border-cyber-border text-gray-500'}`}
+                >
+                  {APPS.find(a => a.id === w.appId)?.name.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-col items-end">
-            <span className="text-cyber-cyan font-bold">{new Date().toLocaleTimeString()}</span>
-            <span>02-MAY-2026</span>
+
+          <div className="flex items-center gap-6 font-mono text-[10px] text-gray-400">
+            {user || isGuest ? (
+              <div className="flex items-center gap-4 border-r border-white/10 pr-6 mr-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-white font-bold">{user?.displayName || 'GUEST_OPERATOR'}</span>
+                  <span className={`text-[8px] uppercase tracking-widest ${user ? 'text-green-500' : 'text-yellow-500 opacity-50'}`}>
+                    Session: {user ? 'Neural_Sync' : 'Local_Guest'}
+                  </span>
+                </div>
+                {(user || isGuest) && (
+                  <button onClick={handleLogout} className="p-2 hover:bg-red-500/10 rounded text-red-500 transition-colors" title="Termination Session">
+                    <LogOut className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <button 
+                onClick={handleLogin}
+                className="flex items-center gap-2 px-4 py-2 bg-cyber-cyan/10 border border-cyber-cyan/30 rounded text-cyber-cyan hover:bg-cyber-cyan hover:text-black transition-all font-bold uppercase tracking-widest"
+              >
+                <LogIn className="w-4 h-4" />
+                Initialize Session
+              </button>
+            )}
+            
+            <div className="flex items-center gap-2">
+              <Settings className="w-3 h-3" />
+              <span>SYS_OPTIMAL</span>
+            </div>
+            <div className="flex flex-col items-end">
+              <span className="text-cyber-cyan font-bold">{new Date().toLocaleTimeString()}</span>
+              <span>02-MAY-2026</span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Mobile Navigation */}
+      {isMobile && (
+        <nav className={`fixed bottom-0 left-0 right-0 h-20 bg-black/80 backdrop-blur-2xl border-t border-white/10 flex justify-around items-center px-6 z-[100] transition-all ${layoutPolicy === 'bottom' ? 'h-24 pb-4' : ''}`}>
+           <button 
+             onClick={() => setActiveTab('home')}
+             className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'home' ? 'text-cyber-cyan scale-110' : 'text-gray-500'}`}
+           >
+              <Layout className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Home</span>
+           </button>
+           <button 
+             onClick={() => setActiveTab('apps')}
+             className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'apps' ? 'text-cyber-cyan scale-110' : 'text-gray-500'}`}
+           >
+              <Box className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Apps</span>
+           </button>
+           <button 
+             onClick={() => openApp('settings')}
+             className={`flex flex-col items-center gap-1 transition-all ${windows.some(w => w.appId === 'settings') ? 'text-cyber-magenta' : 'text-gray-500'}`}
+           >
+              <Settings className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Config</span>
+           </button>
+           <button 
+             onClick={() => setCurrentOS('boot_loader')}
+             className="flex flex-col items-center gap-1 text-red-500/50 hover:text-red-500"
+           >
+              <Power className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Switch</span>
+           </button>
+        </nav>
+      )}
     </div>
   );
 }
