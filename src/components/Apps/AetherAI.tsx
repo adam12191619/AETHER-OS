@@ -66,8 +66,9 @@ export const AetherAI = () => {
     setIsLoading(true);
 
     try {
-      // 1. Save user message to Firestore
       const chatCol = collection(db, 'users', userId, 'chat_history');
+      
+      // 1. Save user message to Firestore
       await addDoc(chatCol, {
         userId,
         role: 'user',
@@ -75,22 +76,33 @@ export const AetherAI = () => {
         createdAt: serverTimestamp()
       });
 
-      // 2. Generate AI response
+      // 2. Prepare conversation history for the model
+      const formattedContents = messages.map(m => ({
+        role: m.role === 'ai' ? 'model' : 'user',
+        parts: [{ text: m.text }]
+      }));
+      
+      // Add the current user message at the end
+      formattedContents.push({
+        role: 'user',
+        parts: [{ text: userMsg }]
+      });
+
+      // 3. Generate AI response
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: [...messages.map(m => ({
-          role: m.role === 'ai' ? 'model' : 'user',
-          parts: [{ text: m.text }]
-        })), { role: 'user', parts: [{ text: userMsg }] }],
+        contents: formattedContents,
         config: {
           systemInstruction: SYSTEM_PROMPT,
           temperature: 0.9,
+          topP: 0.8,
+          topK: 40
         }
       });
 
-      const aiText = response.text || "Connection lost. Re-establishing link...";
+      const aiText = response.text || "Neural connection stable, but response buffer empty. Please retry uplink.";
       
-      // 3. Save AI response to Firestore
+      // 4. Save AI response to Firestore
       await addDoc(chatCol, {
         userId,
         role: 'ai',
@@ -98,13 +110,14 @@ export const AetherAI = () => {
         createdAt: serverTimestamp()
       });
 
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      console.error("GEMINI_API_ERROR:", error);
+      const errorMessage = error?.message || "Unknown neural interruption.";
       const chatCol = collection(db, 'users', userId, 'chat_history');
       await addDoc(chatCol, {
         userId,
         role: 'ai',
-        text: "ERROR: Neural Link Interrupted. Check system logs.",
+        text: `[SYS_ERROR] Neural Link Interrupted: ${errorMessage.substring(0, 50)}... Selesaikan sinkronisasi API Key di Settings.`,
         createdAt: serverTimestamp()
       });
     } finally {

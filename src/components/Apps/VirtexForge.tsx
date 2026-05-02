@@ -39,7 +39,7 @@ export const VirtexForge = () => {
       addLog(`INJECTING_CHARSET_V4.2... DONE`);
       setTimeout(() => {
         setIsForging(false);
-        addLog(`PAYLOAD_READY: Intensity_${intensity}%`);
+        addLog(`PAYLOAD_READY: ${(intensity * 3).toLocaleString()}B_KB_DENSITY`);
       }, 1500);
     }, 1000);
   };
@@ -63,10 +63,13 @@ export const VirtexForge = () => {
           </div>
           <div>
             <h1 className="text-3xl font-black italic tracking-tighter uppercase">MURBUG_VIRTEX_FORGE</h1>
-            <p className="text-[10px] text-gray-500 mt-1 flex items-center gap-2 uppercase tracking-[0.3em] font-mono">
-              <span className={`w-1.5 h-1.5 rounded-full bg-cyber-magenta animate-ping`} />
-              Neural_Payload_Gen : v7.2.1
-            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <p className="text-[10px] text-gray-500 flex items-center gap-2 uppercase tracking-[0.3em] font-mono">
+                <span className={`w-1.5 h-1.5 rounded-full bg-cyber-magenta animate-ping`} />
+                Neural_Payload_Gen : v9.5.1
+              </p>
+              <span className="text-[8px] bg-cyber-cyan/20 border border-cyber-cyan/30 px-2 py-0.5 rounded text-cyber-cyan font-bold uppercase tracking-widest">5200_FEATURES_ACTIVE</span>
+            </div>
           </div>
         </div>
         <div className="flex gap-4">
@@ -98,13 +101,16 @@ export const VirtexForge = () => {
           </div>
 
           <div className="space-y-4">
-             <div className="flex justify-between items-center">
+             <div className="flex justify-between items-end">
                 <h2 className="text-[10px] font-bold text-cyber-cyan tracking-widest uppercase">Murbug_Intensity</h2>
-                <span className="text-xs font-mono text-cyber-magenta">{intensity}%</span>
+                <div className="flex flex-col items-end">
+                   <span className="text-xs font-mono text-cyber-magenta">{intensity}%</span>
+                   <span className="text-[7px] text-gray-500 font-mono">{(intensity * 3).toLocaleString()}_B_KB</span>
+                </div>
              </div>
              <input 
                type="range" 
-               min="10" 
+               min="1" 
                max="100" 
                value={intensity}
                onChange={(e) => setIntensity(parseInt(e.target.value))}

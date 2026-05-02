@@ -144,10 +144,19 @@ export default function App() {
     const options = ['AETHER_OS_GURU (SENTIENT_AGI)', 'WINDOWS_11 (LEGACY_SUBSYSTEM)'];
 
     useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'ArrowUp') setSelection(prev => (prev === 0 ? options.length - 1 : prev - 1));
+        if (e.key === 'ArrowDown') setSelection(prev => (prev === options.length - 1 ? 0 : prev + 1));
+        if (e.key === 'Enter') setCurrentOS(selection === 0 ? 'aether' : 'windows');
+      };
+      window.addEventListener('keydown', handleKeyDown);
       const timer = setTimeout(() => {
         setCurrentOS(selection === 0 ? 'aether' : 'windows');
       }, 5000);
-      return () => clearTimeout(timer);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown);
+        clearTimeout(timer);
+      };
     }, [selection]);
 
     return (
@@ -392,7 +401,7 @@ export default function App() {
           <div className="h-[1px] bg-white/5 my-4" />
 
           <button 
-            onClick={() => setCurrentOS('boot')}
+            onClick={() => setCurrentOS('boot_loader')}
             className="flex flex-col items-center gap-2 group w-20 opacity-50 hover:opacity-100 transition-opacity"
           >
             <div className="w-14 h-14 glass-morphism rounded-xl flex items-center justify-center hover:border-red-500 shadow-lg transition-all">
