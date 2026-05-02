@@ -30,7 +30,8 @@ import {
   Layout,
   HardDrive,
   Power,
-  Box
+  Box,
+  Cloud
 } from 'lucide-react';
 import { WindowState, AppConfig } from './types';
 import { AetherAI } from './components/Apps/AetherAI';
@@ -41,6 +42,8 @@ import { WebForge } from './components/Apps/WebForge';
 import { VirtexForge } from './components/Apps/VirtexForge';
 import { FaceTrace } from './components/Apps/FaceTrace';
 import { Terminal } from './components/Apps/Terminal';
+import { CloudConsole } from './components/Apps/CloudConsole';
+import { SystemStorage } from './components/Apps/SystemStorage';
 import { auth, googleProvider } from './lib/firebase';
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, handleFirestoreError, OperationType } from './lib/firebase';
@@ -55,6 +58,8 @@ const APPS: AppConfig[] = [
   { id: 'virtex', name: 'Murbug Forge', icon: 'Zap', component: VirtexForge },
   { id: 'trace', name: 'Face Trace AI', icon: 'Scan', component: FaceTrace },
   { id: 'term', name: 'Sentient Shell', icon: 'Cpu', component: Terminal },
+  { id: 'cloud', name: 'Cloud Mesh', icon: 'Cloud', component: CloudConsole },
+  { id: 'storage', name: 'Drive Diagnostics', icon: 'HardDrive', component: SystemStorage },
 ];
 
 export default function App() {
@@ -386,12 +391,12 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4 text-gray-400">
              <div className="flex items-center gap-1">
-                <HardDrive className="w-3 h-3" />
-                <span className="text-[8px] font-mono">3.0TB</span>
+                <HardDrive className="w-3 h-3 text-cyber-cyan shadow-[0_0_5px_rgba(0,243,255,0.5)]" />
+                <span className="text-[8px] font-mono text-white tracking-tighter">3.0TB_GURU</span>
              </div>
              <div className="flex items-center gap-1">
-                <Cpu className="w-3 h-3" />
-                <span className="text-[8px] font-mono">153GB</span>
+                <Cpu className="w-3 h-3 text-cyber-magenta shadow-[0_0_5px_rgba(255,0,255,0.5)]" />
+                <span className="text-[8px] font-mono text-white tracking-tighter">153GB_RAM</span>
              </div>
              <span className="text-[10px] font-bold text-white font-mono">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
@@ -446,7 +451,10 @@ export default function App() {
                   </div>
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
                </div>
-               <div className="p-3 bg-cyber-magenta/5 border border-cyber-magenta/20 rounded-xl flex items-center justify-between mt-2 group hover:border-cyber-magenta/40 transition-all cursor-default">
+             <div 
+                onClick={() => openApp('cloud')}
+                className="p-3 bg-cyber-magenta/5 border border-cyber-magenta/20 rounded-xl flex items-center justify-between mt-2 group hover:border-cyber-magenta/40 transition-all cursor-pointer"
+             >
                   <div>
                      <div className="text-[9px] font-bold text-cyber-magenta">GURU_CLOUD:</div>
                      <div className="text-[7px] text-gray-600 font-mono">Firebase / 3.0_TB_AVAIL</div>
@@ -529,6 +537,16 @@ export default function App() {
                 <Cpu className="w-8 h-8 text-blue-400 mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-sm tracking-widest uppercase">Sentient Shell</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Direct Guru Kernel Access</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-cyber-cyan/20 transition-all cursor-pointer group" onClick={() => openApp('cloud')}>
+                <Cloud className="w-8 h-8 text-cyber-cyan mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Cloud Mesh</h3>
+                <p className="text-[10px] text-gray-500 mt-1">Manage 3.0TB Firebase Cluster</p>
+              </div>
+              <div className="glass-morphism p-6 rounded-2xl border-white/5 hover:border-gray-500/20 transition-all cursor-pointer group" onClick={() => openApp('storage')}>
+                <HardDrive className="w-8 h-8 text-gray-400 mb-4 group-hover:scale-110 transition-transform" />
+                <h3 className="font-bold text-sm tracking-widest uppercase">Drive Diagnostics</h3>
+                <p className="text-[10px] text-gray-500 mt-1">System (C:) 3.0TB Status</p>
               </div>
             </div>
 
@@ -690,13 +708,13 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <div className="flex flex-col items-end">
                   <span className="text-[8px] text-gray-600 uppercase">Cloud_Sync</span>
-                  <span className="text-white text-[10px] font-bold">3.0 TB / FREE</span>
+                  <span className="text-white text-[10px] font-bold">3.0 TB / GURU_EXPANDED</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex flex-col items-end">
                   <span className="text-[8px] text-gray-600 uppercase">Neural_RAM</span>
-                  <span className="text-white text-[10px] font-bold">153 GB</span>
+                  <span className="text-white text-[10px] font-bold">153 GB / AUGMENTED</span>
                 </div>
               </div>
             </div>
@@ -729,6 +747,13 @@ export default function App() {
            >
               <Box className="w-6 h-6" />
               <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Apps</span>
+           </button>
+           <button 
+             onClick={() => openApp('cloud')}
+             className={`flex flex-col items-center gap-1 transition-all ${windows.some(w => w.appId === 'cloud') ? 'text-cyber-cyan' : 'text-gray-500'}`}
+           >
+              <Cloud className="w-6 h-6" />
+              <span className="text-[8px] font-bold uppercase tracking-[0.2em]">Cloud</span>
            </button>
            <button 
              onClick={() => setCurrentOS('boot_loader')}
