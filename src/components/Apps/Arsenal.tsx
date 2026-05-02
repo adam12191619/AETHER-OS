@@ -22,6 +22,8 @@ const CATEGORIES = [
   { id: 'bypass', name: 'Neural Bypass', count: 98, icon: <Zap />, color: 'text-yellow-400', border: 'border-yellow-400/30' },
   { id: 'sat', name: 'Satellite Uplink', count: 154, icon: <Wifi />, color: 'text-blue-500', border: 'border-blue-500/30' },
   { id: 'db', name: 'DB Infiltration', count: 104, icon: <Database />, color: 'text-green-500', border: 'border-green-500/30' },
+  { id: 'osint', name: 'Deep OSINT', count: 85, icon: <Search />, color: 'text-indigo-400', border: 'border-indigo-400/30' },
+  { id: 'malware', name: 'Payload Lab', count: 120, icon: <Activity />, color: 'text-red-500', border: 'border-red-500/30' },
 ];
 
 const ALL_TOOLS = [
@@ -33,7 +35,10 @@ const ALL_TOOLS = [
   { name: 'Firewall Ghost v8', cat: 'bypass', desc: 'Stealth bypass for enterprise firewalls' },
   { name: 'Starlink Intercept', cat: 'sat', desc: 'Direct uplink hijacking protocol' },
   { name: 'SQL-Venom v5', cat: 'db', desc: 'Relational database injection engine' },
-  // ... Imagine 1000+ more
+  { name: 'Social-Siphon', cat: 'osint', desc: 'Mass data harvesting from social APIs' },
+  { name: 'Ransom-Gen Alpha', cat: 'malware', desc: 'Encrypted payload construction unit' },
+  { name: 'Kernel-Striker', cat: 'exploits', desc: 'Ring-0 access privilege escalation' },
+  { name: 'Signal-Jammer X', cat: 'sat', desc: 'Wide-spectrum frequency interference' },
 ];
 
 export const Arsenal = () => {

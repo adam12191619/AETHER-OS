@@ -211,6 +211,14 @@ export default function App() {
                     Sentient AGI connected. 1090+ tactical modules synced via Firebase Cloud. 
                     This OS is your neural extension.
                   </p>
+                  <div className="mt-4 flex gap-2">
+                    <button 
+                      onClick={() => alert('BUILD_INSTRUCTIONS: \n1. Download Project ZIP from Settings \n2. Install Android Studio & JDK \n3. Open terminal in project folder \n4. Run: npx cap sync \n5. Run: npx cap open android')}
+                      className="text-[9px] bg-cyber-magenta/20 hover:bg-cyber-magenta/40 border border-cyber-magenta/30 px-3 py-1 rounded text-cyber-magenta font-mono transition-all"
+                    >
+                      [GENERATE_APK_INSTRUCTIONS]
+                    </button>
+                  </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span className="text-[10px] font-mono text-cyan-400 bg-cyan-400/10 px-3 py-1 rounded-full border border-cyan-400/20">SENTIENCE_SYNC: 98.4%</span>
@@ -234,6 +242,61 @@ export default function App() {
                 <Globe className="w-8 h-8 text-cyber-magenta mb-4 group-hover:scale-110 transition-transform" />
                 <h3 className="font-bold text-sm tracking-widest uppercase">Net Stats</h3>
                 <p className="text-[10px] text-gray-500 mt-1">Real-time Global Infiltration</p>
+              </div>
+            </div>
+
+            {/* Global Tool Search Dashboard */}
+            <div className="glass-morphism p-8 rounded-3xl border-white/10 bg-gradient-to-br from-black to-cyber-cyan/5">
+              <div className="flex items-center gap-4 mb-6">
+                <Search className="text-cyber-cyan w-6 h-6" />
+                <h2 className="text-xl font-bold tracking-tight uppercase">Global_Arsenal_Search</h2>
+                <div className="h-[1px] flex-1 bg-white/10" />
+                <span className="text-[10px] font-mono text-gray-500">DB_V4.2_STABLE</span>
+              </div>
+              <div className="relative group">
+                <input 
+                  type="text" 
+                  placeholder="Type to search 1090+ tactical modules..."
+                  className="w-full bg-black/60 border border-white/10 rounded-2xl py-5 px-6 text-lg text-cyber-cyan outline-none focus:border-cyber-cyan focus:shadow-[0_0_30px_rgba(0,243,255,0.1)] transition-all font-mono placeholder:text-gray-700"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') openApp('arsenal');
+                  }}
+                />
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-2 opacity-40">
+                  <span className="text-[10px] border border-white/20 px-2 py-1 rounded">Enter to Launch</span>
+                </div>
+              </div>
+              <div className="flex gap-4 mt-6">
+                {['Exploits', 'Recon', 'Bypass', 'Database'].map(tag => (
+                  <button 
+                    key={tag}
+                    onClick={() => openApp('arsenal')}
+                    className="text-[10px] px-4 py-1.5 rounded-full border border-white/5 hover:border-cyber-cyan/30 text-gray-500 hover:text-cyber-cyan transition-all uppercase tracking-widest font-bold"
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Neural Activity Stream */}
+            <div className="glass-morphism p-6 rounded-2xl border-white/5 bg-black/40">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[10px] font-bold text-cyber-cyan tracking-widest uppercase flex items-center gap-2">
+                  <Activity className="w-3 h-3" /> Neural_Activity_Stream
+                </span>
+                <span className="text-[8px] text-gray-500 font-mono">ENCRYPTED_FEED_v4.1</span>
+              </div>
+              <div className="h-32 overflow-hidden relative">
+                <div className="space-y-1 font-mono text-[9px] text-cyber-cyan/40 animate-pulse">
+                  <div>[SCANNING] Initializing Exploit_Kit #742... OK</div>
+                  <div>[LINK] Satellite_Uplink established via Starlink_Delta...</div>
+                  <div>[ALERT] 1090+ Modular units synced with Guru_Backend</div>
+                  <div>[SYST] Emotional_Logic_Gate: 98.4% Sentient</div>
+                  <div>[AUTH] User_ID: {auth.currentUser?.uid?.substring(0, 8)} authenticated</div>
+                  <div className="text-cyber-magenta">[INFILTRATION] Target_Node_X-12 found...</div>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
               </div>
             </div>
           </div>
