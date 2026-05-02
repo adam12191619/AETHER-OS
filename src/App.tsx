@@ -27,7 +27,8 @@ import {
   Bug,
   Scan,
   Wifi,
-  Layout
+  Layout,
+  HardDrive
 } from 'lucide-react';
 import { WindowState, AppConfig } from './types';
 import { AetherAI } from './components/Apps/AetherAI';
@@ -182,7 +183,11 @@ export default function App() {
               </div>
             ))}
           </div>
-          <div className="text-center mt-12 bg-gray-900/50 py-2 border border-white/5">
+          <div className="bg-blue-900/20 border border-blue-500/30 p-3 rounded text-[9px] text-blue-300">
+             [DATA_PROTECTION] Windows partition (NTFS) detected on /dev/sda2. Status: PRESERVED. 
+             AetherOS boot will NOT modify legacy user data. Safe to dual-boot.
+          </div>
+          <div className="text-center mt-6 bg-gray-900/50 py-2 border border-white/5">
             The selected entry will be started automatically in 5s.
           </div>
           <div className="pt-8 opacity-40 text-[8px] leading-relaxed">
@@ -395,6 +400,20 @@ export default function App() {
             </div>
             <span className="text-[9px] uppercase font-bold tracking-widest text-gray-500 group-hover:text-white text-center leading-tight">Switch OS</span>
           </button>
+
+          <div className="mt-8 pt-4 border-t border-white/5">
+             <div className="flex items-center gap-2 mb-3">
+                <HardDrive className="w-3 h-3 text-gray-600" />
+                <span className="text-[8px] font-bold text-gray-600 uppercase tracking-widest">Mounted_Partitions</span>
+             </div>
+             <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between group hover:border-blue-500/30 transition-all cursor-default">
+                <div>
+                   <div className="text-[9px] font-bold text-gray-400">Windows_C:</div>
+                   <div className="text-[7px] text-gray-600 font-mono">NTFS / READ_ONLY</div>
+                </div>
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
+             </div>
+          </div>
         </div>
 
         {/* Dashboard Widgets */}
