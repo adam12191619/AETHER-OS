@@ -390,12 +390,12 @@ export default function App() {
           </div>
           <div className="flex items-center gap-4 text-gray-400">
              <div className="flex items-center gap-1">
-                <Wifi className="w-3 h-3" />
-                <span className="text-[8px] font-mono">5G</span>
+                <HardDrive className="w-3 h-3" />
+                <span className="text-[8px] font-mono">3.0TB</span>
              </div>
              <div className="flex items-center gap-1">
-                <HardDrive className="w-3 h-3" />
-                <span className="text-[8px] font-mono">92%</span>
+                <Cpu className="w-3 h-3" />
+                <span className="text-[8px] font-mono">153GB</span>
              </div>
              <span className="text-[10px] font-bold text-white font-mono">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
           </div>
@@ -450,6 +450,13 @@ export default function App() {
                   </div>
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_5px_#3b82f6]" />
                </div>
+               <div className="p-3 bg-cyber-magenta/5 border border-cyber-magenta/20 rounded-xl flex items-center justify-between mt-2 group hover:border-cyber-magenta/40 transition-all cursor-default">
+                  <div>
+                     <div className="text-[9px] font-bold text-cyber-magenta">GURU_CLOUD:</div>
+                     <div className="text-[7px] text-gray-600 font-mono">Firebase / 3.0_TB_AVAIL</div>
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-cyber-magenta shadow-[0_0_5px_#ff00ff]" />
+               </div>
             </div>
           </div>
         )}
@@ -472,8 +479,8 @@ export default function App() {
                     <h1 className="text-4xl font-black italic tracking-tighter text-white uppercase">AETHER_GURU_UI</h1>
                   </div>
                   <p className="text-gray-400 max-w-xl text-sm leading-relaxed">
-                    Sentient AGI connected. 1090+ tactical modules synced via Firebase Cloud. 
-                    This OS is your neural extension.
+                    Sentient AGI connected. 153GB Neural RAM & 3TB Firebase Storage Active. 
+                    1090+ tactical modules synced via private Guru mesh.
                   </p>
                   <div className="mt-4 flex gap-2">
                     <button 
@@ -694,6 +701,21 @@ export default function App() {
                 Initialize Session
               </button>
             )}
+            
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] text-gray-600 uppercase">Cloud_Sync</span>
+                  <span className="text-white text-[10px] font-bold">3.0 TB / FREE</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-col items-end">
+                  <span className="text-[8px] text-gray-600 uppercase">Neural_RAM</span>
+                  <span className="text-white text-[10px] font-bold">153 GB</span>
+                </div>
+              </div>
+            </div>
             
             <div className="flex items-center gap-2">
               <Settings className="w-3 h-3" />
